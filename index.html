@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+html,body { height:calc(100% - 30px);}
+
+svg {
+	width: 100%;
+	height: 100%;
+}
+text {
+  font: 12px sans-serif;
+}
+</style>
+<body>
+<script src="d3.min.js"></script>
+<div id="simPlot">
+</div>
+<div id="selector"></div>
+<iframe id = "formframe" src=""  width=100% height=100%>
+  <p>Your browser does not support iframes.</p>
+</iframe>
+
+<script>
+d3.csv('test.csv',function (data) {
+// CSV section
+//<svg id="plot" width="1000" height="600"></svg>
+  var PlatSelect = ""
+  var simPlot = d3.select('#simPlot')
+  var selector = d3.select('#selector')
+  var seriesNames = d3.keys(data[0])
+//      .filter(function(d) { return (d !== "NAME" && d !== "STABBR" && d !== "REGION"); });
+	var selectData = [];
+	
+//	data.forEach(function(d){ 
+//	  seriesNames.forEach(function(dd) {
+//	  d[dd] = +d[dd];
+//	})
+//  });
+  
+  seriesNames.forEach(function(d) {
+	selectData.push({"text":d});
+  });
+  
+//  console.log(selectData);
+	var IDList = []
+  // Select X-axis Variable
+  var span = simPlot.append('span')
+    .text('Select Plat and inspection type: ')
+  var xInput = simPlot.append('select')
+      .attr('id','xSelect')
+      .on('change',xChange)
+    .selectAll('option')
+      .data(selectData)
+      .enter()
+    .append('option')
+      .attr('value', function (d) { return d.text })
+      .text(function (d) { return d.text ;})
+  
+
+  // Select Y-axis Variable
+  var span = selector.append('span')
+      .text('Select ID: ')
+  var yInput = selector.append('select')
+      .attr('id','ySelect')
+      .on('change',yChange)
+    .selectAll('option')
+      .data(IDList)
+      .enter()
+    .append('option')
+      .attr('value', function (d) { return d.text })
+      .text(function (d) { return d.text ;})
+  //simPlot.append('br')
+  
+  // Variables
+  var simPlot = d3.select('#simPlot')
+
+  // Scales
+
+	  //
+	  	  
+  function yChange() {
+    var value = this.value // get the new y value
+	var URL = ""
+//	console.log(value);
+//	console.log(PlatSelect)
+	if (PlatSelect[1] == "Laterals") {
+	   URL = "https://app.smartsheet.com/b/form/fb55a04cf12e4301aa113887107ebcb5?Plat Number="+PlatSelect[0]+"&Address="+value
+	} 
+	else if (PlatSelect[1] == "Mains") {
+	   URL = "https://app.smartsheet.com/b/form/95e3c19eabfd4ce6bcf4083fcb00b555?Plat Number="+PlatSelect[0]+"&Segment ID="+value
+	} else if (PlatSelect[1] == "Storm") {
+	   URL = "https://app.smartsheet.com/b/form/06b92627edcb4891b5303272d999bba8?Plat Number="+PlatSelect[0]+"&Segment ID="+value
+	}
+	
+//	var URL = "https://app.smartsheet.com/b/form/46bcbc55f8db489587ab8ff9f3139876?Project Number="++"&Inspection Type="+PlatSelect[1]+"&Column1="+value
+//	console.log(URL)
+	document.getElementById('formframe').src = URL
+	//window.open(URL)
+  }
+
+  function xChange() {
+    PlatSelect = this.value.split("-")
+	var IDList = []
+    var value = this.value // get the new x value
+	//console.log(value)
+	
+
+	
+	data.forEach(function(d){ 
+		//console.log(d)
+		if (d[value] != "") {
+			IDList.push({"text":d[value]})
+		}
+	})
+	selector.selectAll('select').remove()
+	yInput = selector.append('select')
+      .attr('id','ySelect')
+      .on('change',yChange).selectAll('option')
+      .data(IDList)
+      .enter()
+    .append('option')
+      .attr('value', function (d) { return d.text })
+      .text(function (d) { return d.text ;})
+  }
+
+  
+  
+})
+
+</script>
+</body>
